@@ -1,0 +1,435 @@
+
+from google.colab import drive
+drive.mount('/content/gdrive')
+%matplotlib inline
+import matplotlib.pyplot as plt
+from PIL import Image
+import numpy as np
+import math
+import copy
+import numpy as np
+!pip install keras_vggface
+!pip install keras_applications
+!pip install keras.engine.topology
+!pip install np_utils
+!pip install tensorflow
+from keras.utils.layer_utils import get_source_inputs
+from keras.utils import get_source_inputs
+from keras.utils.layer_utils import get_source_inputs
+from tensorflow import keras
+#import tensorflow as tf
+#from tensorflow.keras import layers
+#from keras import utils as np_utils
+#import tensorflow.keras
+from keras.utils.np_utils import to_categorical
+#from tensorflow.keras.layers import Layer, InputSpec
+from tensorflow.python.keras.layers import Layer, InputSpec
+#from keras.models import Sequential, Model
+#from keras.engine.topology import get_source_inputs
+#from keras.layers import Input, Dense, Flatten, Dropout, Activation, Lambda, Permute, Reshape
+from keras_vggface.vggface import VGGFace
+from keras_vggface import utils
+from keras.preprocessing import image
+from sklearn.datasets import load_files       
+from keras.utils import np_utils
+import numpy as np
+from glob import glob
+import pandas as pd
+import cv2
+import scipy.misc
+import matplotlib.pyplot as plt
+%matplotlib inline
+
+# define function to load train, test, and validation datasets
+def load_dataset(path):
+    """
+    Loads the images from path.
+    
+    Args
+    ----------
+    path : String
+        Holds the path of the dataset
+
+    Returns
+    -------
+    Array
+        Two numpy arrays that holds the images and the targets.
+    """
+    data = load_files(path)
+    face_files = np.array(data['filenames'])
+    face_targets = np_utils.to_categorical(np.array(data['target']), 2)
+    return face_files, face_targets
+
+# load train, test, and validation datasets
+train_files, train_targets = load_dataset('/content/gdrive/MyDrive/DATASET/facesResNet/train')
+valid_files, valid_targets = load_dataset('/content/gdrive/MyDrive/DATASET/facesResNet/valid')
+test_files, test_targets = load_dataset('/content/gdrive/MyDrive/DATASET/facesResNet/test')
+
+
+# load list of dog names
+face_names = [item[20:-1] for item in sorted(glob("/content/gdrive/MyDrive/DATASET/facesResNet/train/*/"))]
+
+# print statistics about the dataset
+print('There are %d total face names.' % len(face_names))
+print('There are %s total face images.\n' % len(np.hstack([train_files, valid_files, test_files])))
+print('There are %d training face images.' % len(train_files))
+print('There are %d validation face images.' % len(valid_files))
+print('There are %d test face images.'% len(test_files))
+from PIL import Image
+import cv2  
+import glob
+import time
+from google.colab.patches import cv2_imshow  
+img_number=0
+# Load the cascade  
+face_cascade=cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
+#file path
+path='/content/gdrive/MyDrive/Fake-Face-Detection-DeepFakes-CNN-master/videos/train_sample_videos/'  
+all_videos=glob.glob(path + "*mp4")
+li=[]
+counter=0
+for video in all_videos:
+  # To capture video from existing video.  
+  cap = cv2.VideoCapture(video)  
+  counter=counter+1
+  print(counter)
+  #while True:  
+    # Read the frame 
+  _, img = cap.read()     
+  _, img = cap.read()
+  #cv2_imshow(img)  
+    # Convert to grayscale  
+    #gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)  
+ 
+    # Detect the faces 
+     faces = face_cascade.detectMultiScale(img, scaleFactor=1.1, minNeighbors=2)  
+  wmax=0
+  hmax=0
+  ImageFolder ='/content/gdrive/MyDrive/Fake-Face-Detection-DeepFakes-CNN-master/faces/train'
+    # Draw the rectangle around each face  
+  for (x, y, w, h) in faces: 
+    if w>wmax and h>hmax:
+      wmax=w
+      hmax=h
+  #print(wmax)
+  #print(hmax)
+  for (x, y, w, h) in faces: 
+    img_number=img_number+1
+    if w == wmax and h==hmax : 
+        cv2.rectangle(img, (x, y), (x+w, y+h), (255, 0, 0), 1)  
+        crop_img = img[y:y+h, x:x+w]
+        li.append(crop_img)
+        cv2.imwrite("/content/gdrive/MyDrive/Fake-Face-Detection-DeepFakes-CNN-master/faces/train/image_"+str(img_number)+".jpg",crop_img)
+        #crop_img = crop_img.save("/content/gdrive/MyDrive/Fake-Face-Detection-DeepFakes-CNN-master/faces/trainimage_"+str(img_number)+".jpg")
+        #test=cv2.imwrite('/content/gdrive/MyDrive/Fake-Face-Detection-DeepFakes-CNN-master/faces/train/image_{i}.png',crop_img)
+        #print(test)
+        
+    # Display  
+        cv2_imshow(crop_img) 
+        #img.save('/content/gdrive/MyDrive/Fake-Face-Detection-DeepFakes-CNN-master/faces/train'+ crop_img , 'JPEG')
+    # Stop if escape key is pressed  
+  k = cv2.waitKey(1000) & 0xff  
+  if k==27:  
+        break  
+         
+# Release the VideoCapture object  
+  cap.release()
+  
+  def performance_viz(history, xc_length):
+    """
+    Visualizes training history.
+    
+    Args
+    ----------
+    history : Keras object
+        Holds the training history
+
+    Returns
+    -------
+    Empty.
+    """
+    train_loss = history_aug.history['loss']
+    val_loss = history_aug.history['val_loss']
+    train_acc = history_aug.history['acc']
+    val_acc = history_aug.history['val_acc']
+    xc = range(xc_length)
+
+    # Visualize Train vs Validation loss
+    plt.figure(1,figsize=(7,5))
+    plt.plot(xc,train_loss)
+    plt.plot(xc,val_loss)
+    plt.xlabel('Epochs')
+    plt.ylabel('Loss')
+    plt.title('Train_loss vs Val_loss')
+    plt.grid(True)
+    plt.legend(['train','val'])
+    print (plt.style.available)
+    plt.style.use(['classic'])
+    plt.show()
+    # Visualize Train vs Validation Accuracy
+    plt.figure(2,figsize=(7,5))
+    plt.plot(xc,train_acc)
+    plt.plot(xc,val_acc)
+    plt.xlabel('Epochs')
+    plt.ylabel('Acc')
+    plt.title('Train Acc vs Val Acc')
+    plt.grid(True)
+    plt.legend(['Train','Val'],loc=4)
+    plt.style.use(['classic'])
+    plt.show()
+    
+    # Loads the weights and Evaluates the model's performance
+def load_weights(model,file_name, test, test_targets):
+    """
+    Load the best weights saved from during training the proposed CNN architecture and evaluates the model's performance.
+    
+    Args
+    ----------
+    model : Keras object
+        Holds the proposed CNN architecture.
+    
+    test : Numpy array
+        Holds the test images.
+    
+    test_targets : Numpy Array
+        Holds the images labels in a string format.
+    
+    Returns
+    -------
+    Empty.
+    """
+    model.load_weights('saved_models/' + file_name) # Load weights
+
+    score = model.evaluate(test, test_targets, verbose=0)
+    print('\n', 'Test accuracy:', score[1])
+    
+    import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
+
+# Load original image
+img_1 = mpimg.imread(train_files[0])
+
+# Load fake image
+img_2 = mpimg.imread(train_files[2])
+
+# Print a subplot
+plt.figure(1)
+plt.subplot(211)
+plt.imshow(img_1)
+
+plt.subplot(212)
+plt.imshow(img_2)
+plt.show()
+
+from keras.preprocessing import image                  
+from tqdm import tqdm
+
+def path_to_tensor(img_path):
+    """
+    Creates tensor of a single image to be consumed by the CNN architecture.
+    
+    Args
+    ----------
+    img_path : Numpy Array
+        Holds the images paths.
+    
+    Returns
+    -------
+    Tensor : Tensorflow object.
+        Holds the converted image.
+    """
+    # loads RGB image as PIL.Image.Image type
+    img = image.load_img(img_path, target_size=(224, 224))
+    # convert PIL.Image.Image type to 3D tensor with shape (224, 224, 3)
+    x = image.img_to_array(img)
+    # convert 3D tensor to 4D tensor with shape (1, 224, 224, 3) and return 4D tensor
+    return np.expand_dims(x, axis=0)
+
+def paths_to_tensor(img_paths):
+    """
+    Creates tensors of images to be consumed by the CNN architecture.
+    
+    Args
+    ----------
+    img_path : Numpy Array
+        Holds the images paths.
+    
+    Returns
+    -------
+    list_of_tensors : Tensorflow object.
+        Holds the converted images.
+    """
+    list_of_tensors = [path_to_tensor(img_path) for img_path in tqdm(img_paths)]
+    return np.vstack(list_of_tensors)
+    
+    def resize_img(img, max_dim=96):
+    large_axis = max((0, 1), key=lambda x: img.size[x])
+    scalar = max_dim / float(img.size[large_axis])
+    resized = img.resize(
+        (int(img.size[0] * scalar), int(img.size[1] * scalar)))
+    return resized
+
+
+def load_image_data(id_list, max_dim=96, center=True):   
+    X = np.empty((len(id_list), max_dim, max_dim, 1))
+    for i, idnum in enumerate(id_list):
+        x = image.load_img(
+            (str(idnum)), grayscale=True)
+        x = image.img_to_array(resize_img(x, max_dim=max_dim))
+        height = x.shape[0]
+        width = x.shape[1]
+        if center:
+            h1 = int((max_dim - height) / 2)
+            h2 = h1 + height
+            w1 = int((max_dim - width) / 2)
+            w2 = w1 + width
+        else:
+            h1, w1 = 0, 0
+            h2, w2 = (height, width)
+        X[i, h1:h2, w1:w2, :] = x
+    return np.around(X / 255.0)
+    
+    from keras.preprocessing.image import ImageDataGenerator
+def aug():
+    """
+    Auguments the images in case the dataset of images is small.
+    
+    Args
+    ----------
+    Empty.
+    
+    Returns
+    -------
+    datagen_train : ImageDatagenerator Object.
+        Holds the augumented train dataset.
+    """
+    # create and configure augmented image generator
+    datagen_train = ImageDataGenerator(
+        width_shift_range=0.2,  # randomly shift images horizontally (10% of total width)
+        height_shift_range=0.2,  # randomly shift images vertically (10% of total height)
+        #horizontal_flip=True,
+        #vertical_flip = True,
+        shear_range=0.15,
+        zoom_range=0.2) # randomly flip images horizontally
+        # fit augmented image generator on data
+    return datagen_train
+    #datagen_valid.fit(valid_tensors)
+
+
+!pip uninstall tensorflow 
+#!pip install tensorflow==1.14
+!pip install tensorflow==2.11.0
+!pip uninstall keras 
+#!pip install keras==2.2.4
+!pip install keras==2.11.0
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, GlobalAveragePooling2D
+from tensorflow.keras.layers import Dropout, Flatten, Dense
+from tensorflow.keras import Sequential
+from tensorflow import keras
+from tensorflow.keras import layers
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+!pip install tensorflow.python.keras.layers.normalization
+from tensorflow.python.keras.layers.normalization import BatchNormalization
+"""
+    Propsoed CNN architecture.
+    
+"""
+
+model = Sequential()
+
+# Pamameters Initialization
+input_shape = (96, 96, 1)
+activation = 'relu'
+padding = 'same'
+droprate = 0.1
+epsilon=0.001
+
+model = Sequential()
+model.add(BatchNormalization(input_shape=input_shape))
+model.add(Conv2D(filters=16, kernel_size=3, activation=activation, padding=padding))
+model.add(MaxPooling2D(pool_size=2))
+model.add(BatchNormalization(epsilon=epsilon))
+
+
+model.add(Conv2D(filters=32, kernel_size=3, activation=activation, padding=padding))
+model.add(MaxPooling2D(pool_size=2))
+model.add(BatchNormalization(epsilon=epsilon))
+model.add(Dropout(droprate))
+
+model.add(Conv2D(filters=64, kernel_size=3, activation=activation, padding=padding))
+model.add(MaxPooling2D(pool_size=2))
+model.add(BatchNormalization(epsilon=epsilon))
+model.add(Dropout(droprate))
+
+model.add(Conv2D(filters=128, kernel_size=3, activation=activation, padding=padding))
+model.add(MaxPooling2D(pool_size=2))
+model.add(BatchNormalization(epsilon=epsilon))
+model.add(Dropout(droprate))
+
+model.add(Conv2D(filters=256, kernel_size=3, activation=activation, padding=padding))
+model.add(MaxPooling2D(pool_size=2))
+model.add(BatchNormalization(epsilon=epsilon))
+model.add(Dropout(droprate))
+
+model.add(Conv2D(filters=512, kernel_size=3, activation=activation, padding=padding))
+model.add(MaxPooling2D(pool_size=2))
+model.add(BatchNormalization(epsilon=epsilon))
+model.add(Dropout(droprate))
+
+model.add(GlobalAveragePooling2D())
+#model.add(Flatten())
+#model.add(Dense(256, kernel_initializer='glorot_normal', activation='relu'))
+#model.add(Dropout(0.5))
+          
+#model.add(Dense(128, kernel_initializer='glorot_normal', activation='relu'))
+#model.add(Dropout(0.5))
+#model.add(Dropout(droprate))
+model.add(Dense(2, activation='softmax'))
+
+model.summary() # Summary of the architecture
+
+# Parameters Initialization
+from tensorflow.python.keras.optimizers import rmsprop,SGD,Adam,Adadelta
+
+#opt = rmsprop(lr=0.0001, decay=1e-6)
+
+model.compile(loss='categorical_crossentropy',optimizer=rmsprop(0.0001), metrics=['accuracy'])
+
+train_X = load_image_data(train_files)
+valid_X = load_image_data(valid_files)
+test_X = load_image_data(test_files)
+
+train_augmented_X = aug()
+
+from tensorflow.keras.callbacks import ModelCheckpoint,EarlyStopping  
+
+batch_size = 10
+epochs = 100
+
+checkpointer = ModelCheckpoint(filepath='/content/gdrive/My Drive/saved_models/weights.custom.best.hdf5', 
+                               monitor='val_loss',verbose=1, save_best_only=True)
+
+early_stopping = EarlyStopping(monitor='val_loss', patience=4, verbose=0, mode='auto')
+hist = model.fit(train_X, train_targets,
+                    steps_per_epoch=train_X.shape[0] ,
+                    epochs=epochs, verbose=1, callbacks=[checkpointer,early_stopping],
+                    validation_data=(valid_X, valid_targets),
+                    validation_steps=valid_X.shape[0] )
+
+
+
+load_weights(model_custom,'weights.custom.best.hdf5', test_X, test_targets)
+
+batch_size = 20
+epochs = 25
+
+from keras.callbacks import ModelCheckpoint,EarlyStopping  
+early_stopping = EarlyStopping(monitor='val_loss', patience=5, verbose=0, mode='auto')
+checkpointer = ModelCheckpoint(filepath='saved_models/weights.aug.best.hdf5', 
+                               monitor='val_loss',verbose=1, save_best_only=True)
+history_aug = model_custom.fit_generator(train_augmented_X.flow(train_X, train_targets, batch_size=batch_size,shuffle=True),
+                    steps_per_epoch=train_X.shape[0] ,
+                    epochs=epochs, verbose=1, callbacks=[checkpointer,early_stopping],
+                    validation_data=(valid_X, valid_targets),
+                    validation_steps=valid_X.shape[0] )
+                    load_weights(model_custom,'weights.aug.best.hdf5', test_X, test_targets)
