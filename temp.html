@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>DeepFake Detection and Generation</title>
+  <link rel="stylesheet" type="text/css"
+    href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      font-family: Century Gothic;
+    }
+
+    header {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      flex-direction: column;
+      background-image: url("https://image.cnbcfm.com/api/v1/image/106341604-1579261030301thumbnailreports_deepfakevideo_clean_03.jpg?v=1579261049://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRYBmfxfjmw6Sgg91auk4fh3Vm3gX349Bs-Jw&usqp=CAU");
+      height: 100vh;
+      background-size: cover;
+      background-position: center;
+      min-height: 100px;
+      padding: 20px;
+    }
+
+    header h1 {
+      color: #fff;
+      font-size: 85px;
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    .button-container {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+    }
+
+    .btn {
+      border: 1px solid #fff;
+      padding: 10px 30px;
+      margin: 10px;
+      color: #fff;
+      transition: 0.6s ease;
+      font-size: 18px;
+      text-decoration: none;
+    }
+
+    .btn:hover {
+      background-color: #fff;
+      color: #000;
+    }
+
+    .form-container {
+      color: #fff;
+      margin-top: 20px;
+      display: flex;
+      justify-content: center; /* Center horizontally */
+      align-items: flex-start; /* Align to the top */
+      flex-direction: column; /* Stack items vertically */
+    }
+
+    .form-container form {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .form-container form input[type="file"] {
+      display: none;
+    }
+
+    .form-container form input[type="submit"] {
+      margin-top: 10px;
+      padding: 10px 20px;
+      border: none;
+      background-color: #fff;
+      color: #000;
+      cursor: pointer;
+      transition: background-color 0.6s ease, color 0.6s ease;
+    }
+
+    .form-container form input[type="submit"]:hover {
+      background-color: #000;
+      color: #fff;
+    }
+
+    .prediction {
+      color: #fff;
+      font-size: 24px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <div>
+      <h1>Video Verify</h1>
+    </div>
+    <div class="button-container">
+      <a href="#" onclick="document.getElementById('chooseFile').click()" class="btn">DETECT</a>
+      <a href="generate.html" onclick="generate()" class="btn">GENERATE</a>
+    </div>
+    <div class="form-container">
+      <form action="{{url_for('upload')}}" method="post" enctype="multipart/form-data">
+        <input type="file" id="chooseFile" name="video">
+        <input type="submit" value="Upload">
+      </form>
+    </div>
+    <div class="prediction">
+      <h2>Prediction: {{ prediction }}</h2>
+    </div>
+  </header>
+
+</body>
+
+</html>
