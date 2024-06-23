@@ -1,0 +1,11 @@
+<!doctype html>
+<html>
+<head>
+    <title>Preview Video</title>
+</head>
+<body>
+    <video width="320" height="240" controls>
+        <source src="{{url_for('static', filename='videos/' + video_name)}}" type="video/mp4">
+    </video>
+</body>
+</html>
